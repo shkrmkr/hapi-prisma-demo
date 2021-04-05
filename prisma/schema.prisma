@@ -1,0 +1,74 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int    @id @default(autoincrement())
+  email     String @unique
+  firstName String
+  lastName  String
+  social    Json?
+
+  // Relation fields
+  courses     CourseEnrollment[]
+  testResults TestResult[]       @relation("results")
+  testsGraded TestResult[]       @relation("graded")
+}
+
+model Course {
+  id            Int    @id @default(autoincrement())
+  name          String
+  courseDetails String
+
+  // Relation fields
+  members CourseEnrollment[]
+  tests   Test[]
+}
+
+// Relation table [User-Course]
+model CourseEnrollment {
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+  role      UserRole
+
+  @@id([courseId, userId])
+}
+
+model Test {
+  id        Int      @id @default(autoincrement())
+  updatedAt DateTime @updatedAt
+  name      String
+  date      DateTime
+
+  // Relation fields
+  course      Course       @relation(fields: [courseId], references: [id])
+  courseId    Int
+  testResults TestResult[]
+}
+
+model TestResult {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  result    Int
+
+  // Relation fields
+  testId    Int
+  test      Test @relation(fields: [testId], references: [id])
+  studentId Int
+  student   User @relation(name: "results", fields: [studentId], references: [id])
+  graderId  Int
+  gradedBy  User @relation(name: "graded", fields: [graderId], references: [id])
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+}

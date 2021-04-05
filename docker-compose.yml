@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  # - TEST_POSTGRES_URI=postgres://dev:dev@localhost:5432/
+
+  postgres:
+    image: postgres:13.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=dev
+      - POSTGRES_PASSWORD=dev
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres:
